@@ -16,6 +16,7 @@ Conda can handle installation of the Python libraries we will be using and all t
 
 There are several options available for installing Conda on a system. Here we will use the Python 3 version of [Miniconda](http://conda.pydata.org/miniconda.html), which installs just Conda and its dependencies. An alternative is to install the [Anaconda Python distribution](https://docs.continuum.io/anaconda/), which installs Conda and a large selection of popular Python packages. As we will require only a small subset of these packages we will use the more barebones Miniconda to avoid eating into your DICE disk quota too much, however if installing on a personal machine you may wish to consider Anaconda if you want to explore other Python packages.
 
+<<<<<<< HEAD
 # Choosing how to access conda:
 
 To proceed please choose either step 2 or 3. Do not execute both steps. Choose the one that best works with your course selections / machine setup.
@@ -51,6 +52,10 @@ This should be enough to enable conda and give you access to your packages. Plea
 
 
 ## 3. Installing Miniconda From Scratch - Only do this step if you have chosen not to do step 2
+=======
+
+## 2. Installing Miniconda
+>>>>>>> 4367faf20628f5127dfd76b6a184fe250d613656
 
 
 We provide instructions here for getting an environment with all the required dependencies running on computers running 
@@ -91,7 +96,8 @@ definition in `.bashrc`. As the DICE bash start-up mechanism differs from the st
 On DICE, append the Miniconda binaries directory to `PATH` in manually in `~/.benv` using
 
 ```
-echo "export PATH=\""\$PATH":$HOME/miniconda3/bin\"" >> ~/.benv
+echo ". /afs/inf.ed.ac.uk/user/${USER:0:3}/$USER/miniconda3/etc/profile.d/conda.sh" >> ~/.bashrc
+echo ". /afs/inf.ed.ac.uk/user/${USER:0:3}/$USER/miniconda3/etc/profile.d/conda.sh" >> ~/.benv
 ```
 
 For those who this appears a bit opaque to and want to know what is going on see here <sup id="a1">[1](#f1)</sup>.
@@ -102,8 +108,14 @@ We now need to `source` the updated `~/.benv` so that the `PATH` variable in the
 source ~/.benv
 ```
 
-From the next time you log in all future terminal sessions should have the updated `PATH` loaded by default.
+From the next time you log in all future terminal sessions should have conda readily available via:
 
+```
+conda activate
+```
+
+
+<<<<<<< HEAD
 To make sure that your conda installation will be available even from an ssh entry from a remote laptop please also do:
 
 ```
@@ -118,6 +130,9 @@ source ~/.benv
 ```
 
 ## 4. Creating the Conda environment
+=======
+## 3. Creating the Conda environment
+>>>>>>> 4367faf20628f5127dfd76b6a184fe250d613656
 
 You should now have a working Conda installation. If you run
 
@@ -148,7 +163,7 @@ activate mlp
 
 When a environment is activated its name will be prepended on to the prompt which should now look something like `(mlp) [machine-name]:~$` on DICE.
 
-**You need to run this `source activate mlp` command every time you wish to activate the `mlp` environment in a terminal (for example at the beginning of each lab)**. When the environment is activated, the environment will be searched first when running commands so that e.g. `python` will launch the Python interpreter installed locally in the `mlp` environment rather than a system-wide version.
+**You need to run this `conda activate mlp` command every time you wish to activate the `mlp` environment in a terminal (for example at the beginning of each lab)**. When the environment is activated, the environment will be searched first when running commands so that e.g. `python` will launch the Python interpreter installed locally in the `mlp` environment rather than a system-wide version.
 
 If you wish to deactivate an environment loaded in the current terminal e.g. to launch the system Python interpreter, you can run `source deactivate` (just `deactivate` on Windows).
 
@@ -168,7 +183,25 @@ conda clean -t
 
 These tarballs are usually cached to allow quicker installation into additional environments however we will only be using a single environment here so there is no need to keep them on disk.
 
+<<<<<<< HEAD
 ## 5. Getting the course code and a short introduction to Git
+=======
+***ANLP and IAML students only:***
+To have normal access to your ANLP and IAML environments please do the following:
+1. ```nano .condarc```
+2. Add the following lines in the file:
+```
+envs_dirs:
+ - /group/teaching/conda/envs
+
+pkgs_dirs:
+ - /group/teaching/conda/pkgs
+ - ~/miniconda3/pkgs
+```
+3. Exit by using control + x and then choosing 'yes' at the exit prompt.
+
+## 4. Getting the course code and a short introduction to Git
+>>>>>>> 4367faf20628f5127dfd76b6a184fe250d613656
 
 The next step in getting our environment set up will be to download the course code. This is available in a Git repository on Github:
 
@@ -409,7 +442,8 @@ You will then be asked whether to prepend the Miniconda binaries directory to th
 
 Append the Miniconda binaries directory to `PATH` in manually in `~/.benv`:
 ```
-echo "export PATH=\""\$PATH":$HOME/miniconda3/bin\"" >> ~/.benv
+echo ". /afs/inf.ed.ac.uk/user/${USER:0:3}/$USER/miniconda3/etc/profile.d/conda.sh" >> ~/.bashrc
+echo ". /afs/inf.ed.ac.uk/user/${USER:0:3}/$USER/miniconda3/etc/profile.d/conda.sh" >> ~/.benv
 ```
 
 `source` the updated `~/.benv`:
@@ -427,7 +461,7 @@ conda create -n mlp python=3
 Activate our created environment:
 
 ```
-source activate mlp
+conda activate mlp
 ```
 
 Install the dependencies for the course into the new environment:
