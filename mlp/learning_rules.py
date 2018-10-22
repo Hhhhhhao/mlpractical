@@ -413,7 +413,7 @@ class RMSPropLearningRule(GradientDescentLearningRule):
         """
         super(RMSPropLearningRule, self).initialise(params)
         self.sum_sq_grads = []
-        for param in self.params
+        for param in self.params:
             self.sum_sq_grads.append(np.zeros_like(param))
 
     def reset(self):
