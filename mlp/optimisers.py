@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Model optimisers.
-
 This module contains objects implementing (batched) stochastic gradient descent
 based optimisation of models.
 """
@@ -20,7 +19,6 @@ class Optimiser(object):
     def __init__(self, model, error, learning_rule, train_dataset,
                  valid_dataset=None, data_monitors=None, notebook=False):
         """Create a new optimiser instance.
-
         Args:
             model: The model to optimise.
             error: The scalar error function to minimise.
@@ -51,7 +49,6 @@ class Optimiser(object):
 
     def do_training_epoch(self):
         """Do a single training epoch.
-
         This iterates through all batches in training dataset, for each
         calculating the gradient of the estimated error given the batch with
         respect to all the model parameters and then updates the model
@@ -69,11 +66,9 @@ class Optimiser(object):
 
     def eval_monitors(self, dataset, label):
         """Evaluates the monitors for the given dataset.
-
         Args:
             dataset: Dataset to perform evaluation with.
             label: Tag to add to end of monitor keys to identify dataset.
-
         Returns:
             OrderedDict of monitor values evaluated on dataset.
         """
@@ -90,7 +85,6 @@ class Optimiser(object):
 
     def get_epoch_stats(self):
         """Computes training statistics for an epoch.
-
         Returns:
             An OrderedDict with keys corresponding to the statistic labels and
             values corresponding to the value of the statistic.
@@ -104,7 +98,6 @@ class Optimiser(object):
 
     def log_stats(self, epoch, epoch_time, stats):
         """Outputs stats for a training epoch to a logger.
-
         Args:
             epoch (int): Epoch counter.
             epoch_time: Time taken in seconds for the epoch to complete.
@@ -117,13 +110,11 @@ class Optimiser(object):
 
     def train(self, num_epochs, stats_interval=5):
         """Trains a model for a set number of epochs.
-
         Args:
             num_epochs: Number of epochs (complete passes through trainin
                 dataset) to train for.
             stats_interval: Training statistics will be recorded and logged
                 every `stats_interval` epochs.
-
         Returns:
             Tuple with first value being an array of training run statistics
             and the second being a dict mapping the labels for the statistics
@@ -145,4 +136,3 @@ class Optimiser(object):
         finish_train_time = time.time()
         total_train_time = finish_train_time - start_train_time
         return np.array(run_stats), {k: i for i, k in enumerate(stats.keys())}, total_train_time
-
