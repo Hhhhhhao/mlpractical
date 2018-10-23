@@ -39,6 +39,7 @@ class Optimiser(object):
         self.train_dataset = train_dataset
         self.valid_dataset = valid_dataset
         self.data_monitors = OrderedDict([('error', error)])
+        self.learning_rate_array = []
         if data_monitors is not None:
             self.data_monitors.update(data_monitors)
         self.notebook = notebook
@@ -108,7 +109,7 @@ class Optimiser(object):
             ', '.join(['{0}={1:.2e}'.format(k, v) for (k, v) in stats.items()])
         ))
 
-    def train(self, num_epochs, stats_interval=5):
+    def train(self, num_epochs, stats_interval=5, scheduler=None):
         """Trains a model for a set number of epochs.
         Args:
             num_epochs: Number of epochs (complete passes through trainin
@@ -126,6 +127,7 @@ class Optimiser(object):
             progress_bar.set_description("Exp Prog")
             for epoch in range(1, num_epochs + 1):
                 start_time = time.time()
+                self.on_epoch_begin(epoch-1, scheduler)
                 self.do_training_epoch()
                 epoch_time = time.time()- start_time
                 if epoch % stats_interval == 0:
@@ -136,3 +138,11 @@ class Optimiser(object):
         finish_train_time = time.time()
         total_train_time = finish_train_time - start_train_time
         return np.array(run_stats), {k: i for i, k in enumerate(stats.keys())}, total_train_time
+    
+    def on_epoch_begin(self, epoch, scheduler):
+        if scheduler is not None:
+            cur_learning_rate = scheduler.update_learning_rule(self.learning_rule, epoch)
+            self.learning_rate_array.append(cur_learning_rate)
+        else:
+            self.learning_rate_array.append(self.learning_rule.learning_rate)
+
