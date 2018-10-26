@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Data providers.
-
 This module provides classes for loading datasets and iterating over batches of
 data points.
 """
@@ -18,7 +17,6 @@ class DataProvider(object):
     def __init__(self, inputs, targets, batch_size, max_num_batches=-1,
                  shuffle_order=True, rng=None):
         """Create a new data provider object.
-
         Args:
             inputs (ndarray): Array of data input features of shape
                 (num_data, input_dim).
@@ -86,7 +84,6 @@ class DataProvider(object):
 
     def __iter__(self):
         """Implements Python iterator interface.
-
         This should return an object implementing a `next` method which steps
         through a sequence returning one element at a time and raising
         `StopIteration` when at the end of the sequence. Here the object
@@ -139,7 +136,6 @@ class MNISTDataProvider(DataProvider):
     def __init__(self, which_set='train', batch_size=100, max_num_batches=-1,
                  shuffle_order=True, rng=None):
         """Create a new MNIST data provider object.
-
         Args:
             which_set: One of 'train', 'valid' or 'eval'. Determines which
                 portion of the MNIST data this object should provide.
@@ -182,13 +178,11 @@ class MNISTDataProvider(DataProvider):
 
     def to_one_of_k(self, int_targets):
         """Converts integer coded class target to 1 of K coded targets.
-
         Args:
             int_targets (ndarray): Array of integer coded class targets (i.e.
                 where an integer from 0 to `num_classes` - 1 is used to
                 indicate which is the correct class). This should be of shape
                 (num_data,).
-
         Returns:
             Array of 1 of K coded targets i.e. an array of shape
             (num_data, num_classes) where for each row all elements are equal
@@ -205,7 +199,6 @@ class EMNISTDataProvider(DataProvider):
     def __init__(self, which_set='train', batch_size=100, max_num_batches=-1,
                  shuffle_order=True, rng=None):
         """Create a new EMNIST data provider object.
-
         Args:
             which_set: One of 'train', 'valid' or 'eval'. Determines which
                 portion of the EMNIST data this object should provide.
@@ -251,13 +244,11 @@ class EMNISTDataProvider(DataProvider):
 
     def to_one_of_k(self, int_targets):
         """Converts integer coded class target to 1 of K coded targets.
-
         Args:
             int_targets (ndarray): Array of integer coded class targets (i.e.
                 where an integer from 0 to `num_classes` - 1 is used to
                 indicate which is the correct class). This should be of shape
                 (num_data,).
-
         Returns:
             Array of 1 of K coded targets i.e. an array of shape
             (num_data, num_classes) where for each row all elements are equal
@@ -275,7 +266,6 @@ class MetOfficeDataProvider(DataProvider):
     def __init__(self, window_size, batch_size=10, max_num_batches=-1,
                  shuffle_order=True, rng=None):
         """Create a new Met Office data provider object.
-
         Args:
             window_size (int): Size of windows to split weather time series
                data into. The constructed input features will be the first
@@ -321,7 +311,6 @@ class CCPPDataProvider(DataProvider):
     def __init__(self, which_set='train', input_dims=None, batch_size=10,
                  max_num_batches=-1, shuffle_order=True, rng=None):
         """Create a new Combined Cycle Power Plant data provider object.
-
         Args:
             which_set: One of 'train' or 'valid'. Determines which portion of
                 data this object should provide.
@@ -369,7 +358,6 @@ class AugmentedMNISTDataProvider(MNISTDataProvider):
     def __init__(self, which_set='train', batch_size=100, max_num_batches=-1,
                  shuffle_order=True, rng=None, transformer=None):
         """Create a new augmented MNIST data provider object.
-
         Args:
             which_set: One of 'train', 'valid' or 'test'. Determines which
                 portion of the MNIST data this object should provide.

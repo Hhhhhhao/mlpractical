@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Parameter initialisers.
-
 This module defines classes to initialise the parameters in a layer.
 """
 
@@ -13,7 +12,6 @@ class ConstantInit(object):
 
     def __init__(self, value):
         """Construct a constant parameter initialiser.
-
         Args:
             value: Value to initialise parameter to.
         """
@@ -28,7 +26,6 @@ class UniformInit(object):
 
     def __init__(self, low, high, rng=None):
         """Construct a random uniform parameter initialiser.
-
         Args:
             low: Lower bound of interval to sample from.
             high: Upper bound of interval to sample from.
@@ -49,7 +46,6 @@ class NormalInit(object):
 
     def __init__(self, mean, std, rng=None):
         """Construct a random uniform parameter initialiser.
-
         Args:
             mean: Mean of distribution to sample from.
             std: Standard deviation of distribution to sample from.
@@ -66,18 +62,15 @@ class NormalInit(object):
 
 class GlorotUniformInit(object):
     """Glorot and Bengio (2010) random uniform weights initialiser.
-
     Initialises an two-dimensional parameter array using the 'normalized
     initialisation' scheme suggested in [1] which attempts to maintain a
     roughly constant variance in the activations and backpropagated gradients
     of a multi-layer model consisting of interleaved affine and logistic
     sigmoidal transformation layers.
-
     Weights are sampled from a zero-mean uniform distribution with standard
     deviation `sqrt(2 / (input_dim * output_dim))` where `input_dim` and
     `output_dim` are the input and output dimensions of the weight matrix
     respectively.
-
     References:
       [1]: Understanding the difficulty of training deep feedforward neural
            networks, Glorot and Bengio (2010)
@@ -85,7 +78,6 @@ class GlorotUniformInit(object):
 
     def __init__(self, gain=1., rng=None):
         """Construct a normalised initilisation random initialiser object.
-
         Args:
             gain: Multiplicative factor to scale initialised weights by.
                 Recommended values is 1 for affine layers followed by
@@ -107,18 +99,15 @@ class GlorotUniformInit(object):
 
 class GlorotNormalInit(object):
     """Glorot and Bengio (2010) random normal weights initialiser.
-
     Initialises an two-dimensional parameter array using the 'normalized
     initialisation' scheme suggested in [1] which attempts to maintain a
     roughly constant variance in the activations and backpropagated gradients
     of a multi-layer model consisting of interleaved affine and logistic
     sigmoidal transformation layers.
-
     Weights are sampled from a zero-mean normal distribution with standard
     deviation `sqrt(2 / (input_dim * output_dim))` where `input_dim` and
     `output_dim` are the input and output dimensions of the weight matrix
     respectively.
-
     References:
       [1]: Understanding the difficulty of training deep feedforward neural
            networks, Glorot and Bengio (2010)
@@ -126,7 +115,6 @@ class GlorotNormalInit(object):
 
     def __init__(self, gain=1., rng=None):
         """Construct a normalised initilisation random initialiser object.
-
         Args:
             gain: Multiplicative factor to scale initialised weights by.
                 Recommended values is 1 for affine layers followed by

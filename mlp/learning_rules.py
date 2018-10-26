@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Learning rules.
-
 This module contains classes implementing gradient based learning rules.
 """
 
@@ -9,16 +8,12 @@ import numpy as np
 
 class GradientDescentLearningRule(object):
     """Simple (stochastic) gradient descent learning rule.
-
     For a scalar error function `E(p[0], p_[1] ... )` of some set of
     potentially multidimensional parameters this attempts to find a local
     minimum of the loss function by applying updates to each parameter of the
     form
-
         p[i] := p[i] - learning_rate * dE/dp[i]
-
     With `learning_rate` a positive scaling parameter.
-
     The error function used in successive applications of these updates may be
     a stochastic estimator of the true error function (e.g. when the error with
     respect to only a subset of data-points is calculated) in which case this
@@ -27,22 +22,24 @@ class GradientDescentLearningRule(object):
 
     def __init__(self, learning_rate=1e-3):
         """Creates a new learning rule object.
-
         Args:
             learning_rate: A postive scalar to scale gradient updates to the
                 parameters by. This needs to be carefully set - if too large
                 the learning dynamic will be unstable and may diverge, while
                 if set too small learning will proceed very slowly.
-
         """
         assert learning_rate > 0., 'learning_rate should be positive.'
         self.learning_rate = learning_rate
+    
+    def set_learning_rate(self, learning_rate):
+        self.learning_rate = learning_rate
+    
+    def get_learning_rate(self):
+        return self.learning_rate
 
     def initialise(self, params):
         """Initialises the state of the learning rule for a set or parameters.
-
         This must be called before `update_params` is first called.
-
         Args:
             params: A list of the parameters to be optimised. Note these will
                 be updated *in-place* to avoid reallocating arrays on each
@@ -52,7 +49,6 @@ class GradientDescentLearningRule(object):
 
     def reset(self):
         """Resets any additional state variables to their intial values.
-
         For this learning rule there are no additional state variables so we
         do nothing here.
         """
@@ -60,10 +56,8 @@ class GradientDescentLearningRule(object):
 
     def update_params(self, grads_wrt_params):
         """Applies a single gradient descent update to all parameters.
-
         All parameter updates are performed using in-place operations and so
         nothing is returned.
-
         Args:
             grads_wrt_params: A list of gradients of the scalar loss function
                 with respect to each of the parameters passed to `initialise`
@@ -75,18 +69,14 @@ class GradientDescentLearningRule(object):
 
 class MomentumLearningRule(GradientDescentLearningRule):
     """Gradient descent with momentum learning rule.
-
     This extends the basic gradient learning rule by introducing extra
     momentum state variables for each parameter. These can help the learning
     dynamic help overcome shallow local minima and speed convergence when
     making multiple successive steps in a similar direction in parameter space.
-
     For parameter p[i] and corresponding momentum m[i] the updates for a
     scalar loss function `L` are of the form
-
         m[i] := mom_coeff * m[i] - learning_rate * dL/dp[i]
         p[i] := p[i] + m[i]
-
     with `learning_rate` a positive scaling parameter for the gradient updates
     and `mom_coeff` a value in [0, 1] that determines how much 'friction' there
     is the system and so how quickly previous momentum contributions decay.
@@ -94,7 +84,6 @@ class MomentumLearningRule(GradientDescentLearningRule):
 
     def __init__(self, learning_rate=1e-3, mom_coeff=0.9):
         """Creates a new learning rule object.
-
         Args:
             learning_rate: A postive scalar to scale gradient updates to the
                 parameters by. This needs to be carefully set - if too large
@@ -124,9 +113,7 @@ class MomentumLearningRule(GradientDescentLearningRule):
 
     def initialise(self, params):
         """Initialises the state of the learning rule for a set or parameters.
-
         This must be called before `update_params` is first called.
-
         Args:
             params: A list of the parameters to be optimised. Note these will
                 be updated *in-place* to avoid reallocating arrays on each
@@ -139,7 +126,6 @@ class MomentumLearningRule(GradientDescentLearningRule):
 
     def reset(self):
         """Resets any additional state variables to their intial values.
-
         For this learning rule this corresponds to zeroing all the momenta.
         """
         for mom in zip(self.moms):
@@ -147,10 +133,8 @@ class MomentumLearningRule(GradientDescentLearningRule):
 
     def update_params(self, grads_wrt_params):
         """Applies a single update to all parameters.
-
         All parameter updates are performed using in-place operations and so
         nothing is returned.
-
         Args:
             grads_wrt_params: A list of gradients of the scalar loss function
                 with respect to each of the parameters passed to `initialise`
@@ -226,7 +210,11 @@ class AdamLearningRule(GradientDescentLearningRule):
         For this learning rule this corresponds to zeroing the estimates of
         the first and second moments of the gradients.
         """
-        raise NotImplementedError
+        for mom_1, mom_2 in zip(self.moms_1, self.moms_2):
+            mom_1 *= 0.
+            mom_2 *= 0.
+
+        self.step_count = 0
 
     def update_params(self, grads_wrt_params):
         """Applies a single update to all parameters.
@@ -237,7 +225,17 @@ class AdamLearningRule(GradientDescentLearningRule):
                 with respect to each of the parameters passed to `initialise`
                 previously, with this list expected to be in the same order.
         """
-        raise NotImplementedError
+        self.step_count += 1
+        for param, mom_1, mom_2, grad in zip(self.params, self.moms_1, self.moms_2, grads_wrt_params):
+            mom_1 *= self.beta_1 
+            mom_1 += (1 - self.beta_1) * grad
+            mom_2 *= self.beta_2 
+            mom_2 += (1 - self.beta_2) * (grad ** 2)
+            
+            mom_1_hat = mom_1 / (1 - self.beta_1 ** self.step_count)
+            mom_2_hat = mom_2 / (1 - self.beta_2 ** self.step_count)
+            param -= (self.learning_rate * mom_1_hat /
+                      (mom_2_hat + self.epsilon)**0.5)
 
 class AdamLearningRuleWithWeightDecay(GradientDescentLearningRule):
     """Adaptive moments (Adam) learning rule with Weight Decay.
@@ -306,7 +304,11 @@ class AdamLearningRuleWithWeightDecay(GradientDescentLearningRule):
         For this learning rule this corresponds to zeroing the estimates of
         the first and second moments of the gradients.
         """
-        raise NotImplementedError
+        for mom_1, mom_2 in zip(self.moms_1, self.moms_2):
+            mom_1 *= 0.
+            mom_2 *= 0.
+
+        self.step_count = 0
 
     def update_params(self, grads_wrt_params):
         """Applies a single update to all parameters.
@@ -320,9 +322,20 @@ class AdamLearningRuleWithWeightDecay(GradientDescentLearningRule):
         # tip:
         # ηt * initial_learning_rate = learning_rate
         # ηt = learning_rate / initial_learning_rate
-
-
-        raise NotImplementedError
+        self.step_count += 1
+        eta_t = self.learning_rate / self.initial_learning_rate
+        
+        for param, mom_1, mom_2, grad in zip(self.params, self.moms_1, self.moms_2, grads_wrt_params):
+            mom_1 *= self.beta_1 
+            mom_1 += (1 - self.beta_1) * grad
+            mom_2 *= self.beta_2 
+            mom_2 += (1 - self.beta_2) * (grad ** 2)
+            
+            mom_1_hat = mom_1 / (1 - self.beta_1 ** self.step_count)
+            mom_2_hat = mom_2 / (1 - self.beta_2 ** self.step_count)
+            param -= ((self.learning_rate * mom_1_hat 
+                       / (mom_2_hat + self.epsilon)**0.5))
+            param -= eta_t * self.weight_decay * param
 
 
 class AdaGradLearningRule(GradientDescentLearningRule):
@@ -429,15 +442,17 @@ class RMSPropLearningRule(GradientDescentLearningRule):
                 update.
         """
         super(RMSPropLearningRule, self).initialise(params)
-
-        raise NotImplementedError
+        self.sum_sq_grads = []
+        for param in self.params:
+            self.sum_sq_grads.append(np.zeros_like(param))
 
     def reset(self):
         """Resets any additional state variables to their initial values.
         For this learning rule this corresponds to zeroing all gradient
         second moment estimates.
         """
-        raise NotImplementedError
+        for sum_sq_grad in self.sum_sq_grads:
+            sum_sq_grad *= 0.
 
     def update_params(self, grads_wrt_params):
         """Applies a single update to all parameters.
@@ -448,4 +463,8 @@ class RMSPropLearningRule(GradientDescentLearningRule):
                 with respect to each of the parameters passed to `initialise`
                 previously, with this list expected to be in the same order.
         """
-        raise NotImplementedError
+        for param, sum_sq_grad, grad in zip(self.params, self.sum_sq_grads, grads_wrt_params):
+            sum_sq_grad *= self.beta 
+            sum_sq_grad += (1 - self.beta) * (grad ** 2)
+            param -= (self.learning_rate * grad /
+                      (sum_sq_grad + self.epsilon)**0.5)
