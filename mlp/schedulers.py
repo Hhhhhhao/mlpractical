@@ -112,5 +112,3 @@ class CosineAnnealingWithWarmRestarts(object):
     def update_params(self):
         self.total_epochs_per_period *= self.period_iteration_expansion_factor
         self.max_learning_rate *= self.max_learning_rate_discount_factor   
-        
-            
