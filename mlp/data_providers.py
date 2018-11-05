@@ -340,3 +340,14 @@ class MNISTAutoencoderDataProvider(MNISTDataProvider):
             MNISTAutoencoderDataProvider, self).next()
         # return inputs as targets for autoencoder training
         return inputs_batch, inputs_batch
+    
+class MNISTDenoisingAutoencoderDataProvider(MNISTDataProvider):
+    """Simple wrapper data provider for training an autoencoder on MNIST."""
+
+    def next(self):
+        """Returns next data batch or raises `StopIteration` if at end."""
+        inputs_batch, targets_batch = super(
+            MNISTDenoisingAutoencoderDataProvider, self).next()
+        # return inputs as targets for autoencoder training
+        noisy_inputs_batch = inputs_batch + self.rng.normal(0, 0.25, inputs_batch.shape)
+        return noisy_inputs_batch, inputs_batch
