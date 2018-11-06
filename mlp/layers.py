@@ -448,7 +448,18 @@ class ConvolutionalLayer(LayerWithParameters):
         Returns:
             outputs: Array of layer outputs of shape (batch_size, num_output_channels, output_height, output_width).
         """
-        raise NotImplementedError
+        padding = 0
+        stride = 1
+        inputs_col = im2col_indices(inputs, self.kernel_height, self.kernel_width, padding, stride)
+        kernels_col = self.kernels.reshape(self.num_output_channels, -1)
+
+        out_height = int((self.input_height + 2 * padding - self.kernel_height) / stride + 1)
+        out_width = int((self.input_width + 2 * padding - self.kernel_width) / stride + 1)
+        out = kernels_col.dot(inputs_col) + self.biases.reshape((self.biases.shape[0], 1))
+        out = out.reshape((self.num_output_channels, out_height,  out_width,  inputs.shape[0]))
+        outputs = out.transpose(3, 0, 1, 2)
+
+        return outputs
 
     def bprop(self, inputs, outputs, grads_wrt_outputs):
         """Back propagates gradients through a layer.
@@ -467,7 +478,12 @@ class ConvolutionalLayer(LayerWithParameters):
             Array of gradients with respect to the layer inputs of shape
             (batch_size, num_input_channels, input_height, input_width).
         """
-        raise NotImplementedError
+        padding = 0
+        stride = 1
+        kernels_col = self.kernels.reshape(self.num_output_channels, -1)
+        dX_col = (kernels_col.T).dot((grads_wrt_outputs.transpose(1, 2, 3, 0)).reshape(self.num_output_channels, -1))
+        dX = col2im_indices(dX_col, inputs.shape, self.kernel_height, self.kernel_width, padding, stride)
+        return dX 
 
     def grads_wrt_params(self, inputs, grads_wrt_outputs):
         """Calculates gradients with respect to layer parameters.
@@ -480,7 +496,20 @@ class ConvolutionalLayer(LayerWithParameters):
             list of arrays of gradients with respect to the layer parameters
             `[grads_wrt_kernels, grads_wrt_biases]`.
         """
-        raise NotImplementedError
+        padding = 0
+        stride = 1
+        inputs_col = im2col_indices(inputs, self.kernel_height, self.kernel_width, padding, stride)
+        grads_wrt_weights = (np.dot((grads_wrt_outputs.transpose(1, 2, 3, 0)).reshape(self.num_output_channels, -1), 
+                                    inputs_col.T)).reshape(self.kernels_shape)
+        grads_wrt_biases = np.sum(grads_wrt_outputs, axis=(0,2,3))
+
+        if self.kernels_penalty is not None:
+            grads_wrt_weights += self.kernels_penalty.grad(parameter=self.weights)
+
+        if self.biases_penalty is not None:
+            grads_wrt_biases += self.biases_penalty.grad(parameter=self.biases)
+
+        return [grads_wrt_weights, grads_wrt_biases]
 
     def params_penalty(self):
         """Returns the parameter dependent penalty term for this layer.
@@ -541,7 +570,13 @@ class MaxPooling2DLayer(Layer):
         :return: The output of the max pooling operation. Assuming a stride=2 the output should have a shape of
         (b, c, (input_height - size)/stride + 1, (input_width - size)/stride + 1)
         """
-        raise NotImplementedError
+        inputs_reshaped = inputs.reshape((inputs.shape[0] * inputs.shape[1], 1, self.input_height, self.input_width))
+        inputs_col = im2col_indices(inputs_reshaped, self.size, self.size, padding=0, stride=self.stride)
+
+        max_idx = np.argmax(inputs_col, axis=0)
+        out = inputs_col[max_idx, range(max_idx.size)]
+        out = out.reshape((self.input_height//self.stride, self.input_width//self.stride, inputs.shape[0], inputs.shape[1]))
+        return out.transpose(2, 3,  0, 1)
 
     def bprop(self, inputs, outputs, grads_wrt_outputs):
         """
@@ -552,7 +587,15 @@ class MaxPooling2DLayer(Layer):
         :param grads_wrt_outputs: The grads wrt to the outputs, of shape equal to that of the outputs.
         :return: grads_wrt_input, of shape equal to the inputs.
         """
-        raise NotImplementedError
+        inputs_reshaped = inputs.reshape((inputs.shape[0] * inputs.shape[1], 1, self.input_height, self.input_width))
+        inputs_col = im2col_indices(inputs_reshaped, self.size, self.size, padding=0, stride=self.stride)
+        max_idx = np.argmax(inputs_col, axis=0)
+
+        dX_col = np.zeros_like(inputs_col)
+        dX_col[max_idx, range(max_idx.size)] = (grads_wrt_outputs.transpose(2,3,0,1)).ravel()
+
+        dX = col2im_indices(dX_col, (inputs.shape[0] * inputs.shape[1], 1, self.input_height, self.input_width),  self.size, self.size, 0, self.stride)
+        return dX.reshape(inputs.shape)
 
 
 class ReluLayer(Layer):
@@ -858,3 +901,56 @@ class ReshapeLayer(Layer):
 
     def __repr__(self):
         return 'ReshapeLayer(output_shape={0})'.format(self.output_shape)
+
+
+def get_im2col_indices(x_shape, field_height, field_width, padding=1, stride=1):
+  # First figure out what the size of the output should be
+  N, C, H, W = x_shape
+  assert (H + 2 * padding - field_height) % stride == 0
+  assert (W + 2 * padding - field_height) % stride == 0
+  out_height = int((H + 2 * padding - field_height) / stride + 1)
+  out_width = int((W + 2 * padding - field_width) / stride + 1)
+
+  i0 = np.repeat(np.arange(field_height), field_width)
+  i0 = np.tile(i0, C)
+  i1 = stride * np.repeat(np.arange(out_height), out_width)
+  j0 = np.tile(np.arange(field_width), field_height * C)
+  j1 = stride * np.tile(np.arange(out_width), out_height)
+  i = i0.reshape(-1, 1) + i1.reshape(1, -1)
+  j = j0.reshape(-1, 1) + j1.reshape(1, -1)
+
+  k = np.repeat(np.arange(C), field_height * field_width).reshape(-1, 1)
+
+  return (k, i, j)
+
+
+def im2col_indices(x, field_height, field_width, padding=1, stride=1):
+  """ An implementation of im2col based on some fancy indexing """
+  # Zero-pad the input
+  p = padding
+  x_padded = np.pad(x, ((0, 0), (0, 0), (p, p), (p, p)), mode='constant')
+
+  k, i, j = get_im2col_indices(x.shape, field_height, field_width, padding,
+                               stride)
+
+  cols = x_padded[:, k, i, j]
+  C = x.shape[1]
+  cols = cols.transpose(1, 2, 0).reshape(field_height * field_width * C, -1)
+  return cols
+
+
+def col2im_indices(cols, x_shape, field_height=3, field_width=3, padding=1,
+                   stride=1):
+  """ An implementation of col2im based on fancy indexing and np.add.at """
+  N, C, H, W = x_shape
+  H_padded, W_padded = H + 2 * padding, W + 2 * padding
+  x_padded = np.zeros((N, C, H_padded, W_padded), dtype=cols.dtype)
+  k, i, j = get_im2col_indices(x_shape, field_height, field_width, padding,
+                               stride)
+  cols_reshaped = cols.reshape(C * field_height * field_width, -1, N)
+  cols_reshaped = cols_reshaped.transpose(2, 0, 1)
+  np.add.at(x_padded, (slice(None), k, i, j), cols_reshaped)
+  if padding == 0:
+    return x_padded
+  return x_padded[:, :, padding:-padding, padding:-padding]
+
