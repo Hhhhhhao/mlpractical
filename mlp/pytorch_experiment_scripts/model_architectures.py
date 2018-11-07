@@ -157,6 +157,11 @@ class ConvolutionalNetwork(nn.Module):
                 self.layer_dict['dim_reduction_avg_pool_{}'.format(i)] = nn.AvgPool2d(2, padding=1)
                 out = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
 
+            elif self.self.dim_reduction_type == 'max_avg_pooling':
+                self.layer_dict['dim_reduction_max_pool_{}'.format(i)] = nn.MaxPool2d(2, padding=1)
+                self.layer_dict['dim_reduction_avg_pool_{}'.format(i)] = nn.AvgPool2d(2, padding=1)
+                out = self.layer_dict['dim_reduction_max_pool_{}'.format(i)](out) + self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
+
             print(out.shape)
         if out.shape[-1] != 2:
             out = F.adaptive_avg_pool2d(out, 2)  # apply adaptive pooling to make sure output of conv layers is always (2, 2) spacially (helps with comparisons).
@@ -194,6 +199,11 @@ class ConvolutionalNetwork(nn.Module):
 
             elif self.dim_reduction_type == 'avg_pooling':
                 out = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
+
+            elif self.dim_reduction_type == 'max_avg_pooling':
+                out_1 = self.layer_dict['dim_reduction_max_pool_{}'.format(i)](out)
+                out_2 = self.layer_dict['dim_reduction_avg_pool_{}'.format(i)](out)
+                out = out_1  + out_2
 
         if out.shape[-1] != 2:
             out = F.adaptive_avg_pool2d(out, 2)
