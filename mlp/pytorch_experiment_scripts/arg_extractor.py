@@ -16,7 +16,7 @@ def get_args():
     parser = argparse.ArgumentParser(
         description='Welcome to the MLP course\'s Pytorch training and inference helper script')
 
-    parser.add_argument('--batch_size', nargs="?", type=int, default=100, help='Batch_size for experiment')
+    parser.add_argument('--batch_size', nargs="?", type=int, default=128, help='Batch_size for experiment')
     parser.add_argument('--continue_from_epoch', nargs="?", type=int, default=-1, help='Batch_size for experiment')
     parser.add_argument('--seed', nargs="?", type=int, default=7112018,
                         help='Seed to use for random number generator for experiment')
@@ -32,7 +32,7 @@ def get_args():
     parser.add_argument('--num_filters', nargs="?", type=int, default=64,
                         help='Number of convolutional filters per convolutional layer in the network (excluding '
                              'dimensionality reduction layers)')
-    parser.add_argument('--num_epochs', nargs="?", type=int, default=100, help='The experiment\'s epoch budget')
+    parser.add_argument('--num_epochs', nargs="?", type=int, default=50, help='The experiment\'s epoch budget')
     parser.add_argument('--experiment_name', nargs="?", type=str, default="exp_1",
                         help='Experiment name - to be used for building the experiment folder')
     parser.add_argument('--use_gpu', nargs="?", type=str2bool, default=False,

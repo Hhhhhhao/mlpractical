@@ -1,4 +1,4 @@
-batch_size = 100
+batch_size = 128
 image_num_channels = 1
 image_height = 28
 image_width = 28
@@ -8,7 +8,7 @@ possible_num_layers = [2,3,4,5]
 experiment_names = ['2_layers', '3_layers', '4_layers', '5_layers',]
 num_epochs = 50
 # weight_decay_coefficient = 1e-05
-seed = 9112018
+seed = 7112018
 use_gpu = True
 
 rng = np.random.RandomState(seed=seed)
