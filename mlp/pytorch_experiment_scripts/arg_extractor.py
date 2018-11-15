@@ -32,6 +32,8 @@ def get_args():
     parser.add_argument('--num_filters', nargs="?", type=int, default=64,
                         help='Number of convolutional filters per convolutional layer in the network (excluding '
                              'dimensionality reduction layers)')
+    parser.add_argument('--kernel_size', nargs="?", type=int, default=3,
+                        help='kernel size of each convolutional layer')
     parser.add_argument('--num_epochs', nargs="?", type=int, default=50, help='The experiment\'s epoch budget')
     parser.add_argument('--experiment_name', nargs="?", type=str, default="exp_1",
                         help='Experiment name - to be used for building the experiment folder')
