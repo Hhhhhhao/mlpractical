@@ -450,20 +450,14 @@ class ConvolutionalLayer(LayerWithParameters):
         """
         padding = 0
         stride = 1
-        print(inputs.shape)
         inputs_col = im2col_indices(inputs, self.kernel_height, self.kernel_width, padding, stride)
-        print(inputs_col.shape)
         kernels_col = self.kernels.reshape(self.num_output_channels, -1)
-        print(kernels_col.shape)
 
         out_height = int((self.input_height + 2 * padding - self.kernel_height) / stride + 1)
         out_width = int((self.input_width + 2 * padding - self.kernel_width) / stride + 1)
         out = kernels_col.dot(inputs_col) + self.biases.reshape((self.biases.shape[0], 1))
-        print(out.shape)
         out = out.reshape((self.num_output_channels, out_height,  out_width,  inputs.shape[0]))
-        print(out.shape)
         outputs = out.transpose(3, 0, 1, 2)
-        print(outputs)
 
         return outputs
 

@@ -145,7 +145,7 @@ class ConvolutionalNetwork(nn.Module):
                 self.layer_dict['dim_reduction_dilated_conv_{}'.format(i)] = nn.Conv2d(in_channels=out.shape[1],
                                                                                        kernel_size=self.kernel_size,
                                                                                        out_channels=out.shape[1],
-                                                                                       padding=int((self.kernel_size-1)/2),
+                                                                                       padding=(i+2) * int((self.kernel_size-1)/2),
                                                                                        bias=self.use_bias, stride=1,
                                                                                        dilation=i + 2)
                 out = self.layer_dict['dim_reduction_dilated_conv_{}'.format(i)](
